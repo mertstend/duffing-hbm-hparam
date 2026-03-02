@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
 
 
 # --------------------- Analytical Solution for Comparison --------------------
@@ -42,19 +43,38 @@ else:
           str(max_diff) + RESET)
 
 colorlist = ['#1D3557', '#E63946', '#00b695', "#457B9D"]
-plt.figure(figsize=(5, 4))
-plt.plot(Om_ana[valid_ana, 0].real, a_ana[valid_ana], '-', color='#A8DADC',
-         label='Analytical')
-plt.plot(Om_ana[valid_ana, 1].real, a_ana[valid_ana], '-', color='#A8DADC')
-plt.plot(ref.iloc[0].to_numpy(), ref.iloc[1].to_numpy(), linestyle='-',
-         color=colorlist[0], label='AFT')
-plt.plot(test.iloc[0].to_numpy(), test.iloc[1].to_numpy(), linestyle='',
-         marker='.', color=colorlist[1], label='Neural Network')
-plt.xlim(0.4, 1.7)
-plt.ylim(0, 3.0)
-plt.xlabel(r'Excitation Frequency $\Omega$')
-plt.ylabel(r'Amplitude $a$')
-plt.legend(loc='upper left')
-plt.grid()
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.plot(Om_ana[valid_ana, 0].real, a_ana[valid_ana], '-', color='#A8DADC',
+        label='Analytical (H=1)')
+ax.plot(Om_ana[valid_ana, 1].real, a_ana[valid_ana], '-', color='#A8DADC')
+ax.plot(ref.iloc[0].to_numpy(), ref.iloc[1].to_numpy(), linestyle='-',
+        color=colorlist[0], label='AFT (H=3)')
+ax.plot(test.iloc[0].to_numpy(), test.iloc[1].to_numpy(), linestyle='',
+        marker='.', color=colorlist[1], label='Neural Network (H=3)')
+ax.set_xlim(0.4, 1.7)
+ax.set_ylim(0, 3.0)
+ax.set_xlabel(r'Excitation Frequency $\Omega$')
+ax.set_ylabel(r'Amplitude $a$')
+ax.legend(loc='upper left')
+ax.grid()
+
+axins = inset_axes(ax,
+                   width="30%",
+                   height="30%",
+                   loc='center left',
+                   bbox_to_anchor=(.71, .0, 1.1, 1.2),
+                   bbox_transform=ax.transAxes,
+                   borderpad=0)
+axins.plot(Om_ana[valid_ana, 0].real, a_ana[valid_ana], '-', color='#A8DADC')
+axins.plot(Om_ana[valid_ana, 1].real, a_ana[valid_ana], '-', color='#A8DADC')
+axins.plot(ref.iloc[0].to_numpy(), ref.iloc[1].to_numpy(),
+           linestyle='-', color=colorlist[0])
+axins.plot(test.iloc[0].to_numpy(), test.iloc[1].to_numpy(),
+           linestyle='', marker='.', color=colorlist[1])
+axins.set_xlim(1.24, 1.285)
+axins.set_ylim(2.7, 2.95)
+axins.grid()
+mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
+
 plt.savefig('./figures/duffing_analytical_aft_nn.svg', bbox_inches='tight')
 plt.show()

@@ -4,7 +4,7 @@ from sklearn.metrics import (
     r2_score,
     mean_squared_error,
     mean_absolute_error,
-    root_mean_squared_error
+    # root_mean_squared_error
     )
 from src.cosine_similarity import cosine_similarity
 from src.aft import compute_AFT_solution
@@ -16,7 +16,7 @@ from src.nn_inference import evaluate_Duffing_nn_H3
 def compare_coefficients(y_true, y_pred, normalize=False, eps=1e-14):
     """
     Compare two arrays of shape (N, 4) using common regression metrics.
-    
+
     Parameters
     ----------
     y_true : ndarray (N,4)
@@ -24,7 +24,7 @@ def compare_coefficients(y_true, y_pred, normalize=False, eps=1e-14):
     normalize : bool
         If True, normalize using mean/std of y_true per output.
     """
-    
+
     if normalize:
         mean = y_true.mean(axis=0, keepdims=True)
         std = y_true.std(axis=0, keepdims=True)
@@ -36,11 +36,14 @@ def compare_coefficients(y_true, y_pred, normalize=False, eps=1e-14):
     N, d = y_true.shape
 
     # ---- Global metrics (averaged over outputs) ----
+    # global relative L2 error (spectral energy error)
     rel_l2_global = np.linalg.norm(y_true - y_pred) / \
-                    (np.linalg.norm(y_true) + eps)  # global relative L2 error (spectral energy error)
+        (np.linalg.norm(y_true) + eps)
     r2_global = r2_score(y_true, y_pred, multioutput='uniform_average')
-    mse_global = mean_squared_error(y_true, y_pred, multioutput='uniform_average')
-    mae_global = mean_absolute_error(y_true, y_pred, multioutput='uniform_average')
+    mse_global = mean_squared_error(y_true, y_pred,
+                                    multioutput='uniform_average')
+    mae_global = mean_absolute_error(y_true, y_pred,
+                                     multioutput='uniform_average')
     rmse_global = np.sqrt(mse_global)
 
     # cosine similarity over whole dataset (flattened vectors)
@@ -132,7 +135,6 @@ def metrics_to_radar_scores(metrics):
     return scores
 
 
-
 def plot_radar(scores):
 
     labels = list(scores.keys())
@@ -143,7 +145,7 @@ def plot_radar(scores):
     angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False).tolist()
     angles += angles[:1]
 
-    fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
 
     ax.plot(angles, values)
     ax.fill(angles, values, alpha=0.25)
@@ -151,7 +153,7 @@ def plot_radar(scores):
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels)
 
-    ax.set_ylim(0,1)
+    ax.set_ylim(0, 1)
 
     plt.show()
 

@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+from matplotlib.colors import LinearSegmentedColormap
 
 
 data_load_date = '2026-02-18_14-04-47'
-data = np.load('data/duffing_training_data_H3_N64_'+data_load_date+'.npz')
+data = np.load('data/duffing_train_data_H3_N64_'+data_load_date+'.npz')
 q_data = data['q_coeffs']
 fnl_data = data['fnl_coeffs']
 x = [1, 2, 5, 6]
@@ -53,22 +54,25 @@ plt.tight_layout()
 
 q_rel = np.loadtxt('data/nn_input_Duffing.txt', delimiter=',')
 data_load_date = '2026-02-18_14-04-47'
-data = np.load('data/duffing_training_data_H3_N64_'+data_load_date+'.npz')
+data = np.load('data/duffing_train_data_H3_N64_'+data_load_date+'.npz')
 q_data = data['q_coeffs']
 a1_data = q_data[:, 0]
 b1_data = q_data[:, 1]
 a3_data = q_data[:, 2]
 b3_data = q_data[:, 3]
 
-PLOT_15 = 0
+PLOT_15 = 1
 if PLOT_15:
+    cmap = LinearSegmentedColormap.from_list(
+        "br_custom",
+        ['#1D3557', '#008b9a', '#f19699', '#e63946'])
     fig = plt.figure(figsize=(5, 9))
 
     # --- Original ---
     ax1 = fig.add_subplot(211, projection='3d')
     p1 = ax1.scatter(
         q_rel[:, 1], q_rel[:, 2], q_rel[:, 5],
-        c=q_rel[:, 6], s=8, alpha=0.5, cmap='coolwarm'
+        c=q_rel[:, 6], s=8, alpha=0.5, cmap=cmap
     )
     p1.set_clim(q_rel[:, 6].min(), q_rel[:, 6].max())
     ax1.set_title("Relevant for application")
@@ -81,7 +85,7 @@ if PLOT_15:
     ax2 = fig.add_subplot(212, projection='3d')
     p2 = ax2.scatter(
         a1_data, b1_data, a3_data,
-        c=b3_data, s=8, alpha=0.5, cmap='coolwarm'
+        c=b3_data, s=8, alpha=0.5, cmap=cmap
     )
     p2.set_clim(q_rel[:, 6].min(), q_rel[:, 6].max())
     ax2.set_title("Training samples")

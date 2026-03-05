@@ -5,7 +5,7 @@ from sklearn.metrics import (
     mean_absolute_error,
     root_mean_squared_error
     )
-from src.cosine_similarity import cosine_similarity
+from scipy.spatial.distance import cosine
 
 
 def compute_error_metrics(y_true, y_pred, normalize=False, eps=1e-14):
@@ -37,7 +37,7 @@ def compute_error_metrics(y_true, y_pred, normalize=False, eps=1e-14):
                                     multioutput='uniform_average')
     rmse_global = root_mean_squared_error(y_true, y_pred,
                                           multioutput='uniform_average')
-    cos_global = cosine_similarity(y_true.ravel(), y_pred.ravel())
+    cos_global = cosine(y_true.ravel(), y_pred.ravel())
     r2_global = r2_score(y_true, y_pred, multioutput='uniform_average')
     rel_l2_global = (np.linalg.norm(y_true - y_pred) /
                      (np.linalg.norm(y_true) + eps))
@@ -58,7 +58,7 @@ def compute_error_metrics(y_true, y_pred, normalize=False, eps=1e-14):
         "MAE": mae_global,
         "MSE": mse_global,
         "RMSE": rmse_global,
-        "Cosine\nDistance": 1-cos_global,
+        "Cosine\nDistance": cos_global,
         r"1-R$^2$": 1-r2_global,
         "Relative\n"+r"L$^2$ norm": rel_l2_global}
     individual_error_metrics = {

@@ -104,3 +104,86 @@ fig.subplots_adjust(wspace=0.8, hspace=0.45)
 fig.tight_layout(rect=[0, 0.08, 1, 1])
 plt.savefig("figures/jacobian_comparison.png", dpi=300, bbox_inches="tight")
 plt.show()
+
+
+###############################################################################
+# Compare conditioning: smallest singular value and condition number
+###############################################################################
+smin_fd = np.empty(K)
+smin_nn = np.empty(K)
+cond_fd = np.empty(K)
+cond_nn = np.empty(K)
+
+for k in range(K):
+    sv_fd = np.linalg.svd(Jsub_fd_nnorder[k], compute_uv=False)
+    sv_nn = np.linalg.svd(J_nn[k], compute_uv=False)
+
+    smin_fd[k] = sv_fd[-1]
+    smin_nn[k] = sv_nn[-1]
+
+    cond_fd[k] = sv_fd[0] / max(sv_fd[-1], 1e-14)
+    cond_nn[k] = sv_nn[0] / max(sv_nn[-1], 1e-14)
+
+print("FD: min smin =", np.min(smin_fd), " max cond =", np.max(cond_fd))
+print("NN: min smin =", np.min(smin_nn), " max cond =", np.max(cond_nn))
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+axes[0].semilogy(smin_fd, '.', label='Finite Differences', alpha=0.7,
+                 color="#A8DADC")
+axes[0].semilogy(smin_nn, '.', label='Neural Network', alpha=0.7,
+                 color="#E63946")
+axes[0].set_title("Smallest singular value")
+axes[0].set_xlabel("Sample index")
+axes[0].set_ylabel(r"$\sigma_{\min}(J)$")
+axes[0].grid(True)
+
+axes[1].semilogy(cond_fd, '.', label='Finite Differences', alpha=0.7,
+                 color="#A8DADC")
+axes[1].semilogy(cond_nn, '.', label='Neural Network', alpha=0.7,
+                 color="#E63946")
+axes[1].set_title("Condition number")
+axes[1].set_xlabel("Sample index")
+axes[1].set_ylabel(r"$\kappa(J)$")
+axes[1].grid(True)
+
+handles, labels = axes[0].get_legend_handles_labels()
+fig.legend(handles, labels, loc="lower center", ncol=2,
+           bbox_to_anchor=(0.5, -0.02))
+fig.tight_layout(rect=[0, 0.08, 1, 1])
+plt.savefig("figures/jacobian_conditioning.svg", bbox_inches="tight")
+plt.show()
+
+
+###############################################################################
+# Conditioning vs Omega
+###############################################################################
+Omega = X_full[:, -1]
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+axes[0].semilogy(Omega, smin_fd, '.', label='Finite Differences', alpha=0.7,
+                 color="#A8DADC")
+axes[0].semilogy(Omega, smin_nn, '.', label='Neural Network', alpha=0.7,
+                 color="#E63946")
+axes[0].set_title("Smallest singular value vs Ω")
+axes[0].set_xlabel(r"$\Omega$")
+axes[0].set_ylabel(r"$\sigma_{\min}(J)$")
+axes[0].grid(True)
+
+axes[1].semilogy(Omega, cond_fd, '.', label='Finite Differences', alpha=0.7,
+                 color="#A8DADC")
+axes[1].semilogy(Omega, cond_nn, '.', label='Neural Network', alpha=0.7,
+                 color="#E63946")
+axes[1].set_title("Condition number vs Ω")
+axes[1].set_xlabel(r"$\Omega$")
+axes[1].set_ylabel(r"$\kappa(J)$")
+axes[1].grid(True)
+
+handles, labels = axes[0].get_legend_handles_labels()
+fig.legend(handles, labels, loc="lower center", ncol=2,
+           bbox_to_anchor=(0.5, -0.02))
+
+fig.tight_layout(rect=[0, 0.08, 1, 1])
+plt.savefig("figures/jacobian_conditioning_vs_omega.svg", bbox_inches="tight")
+plt.show()

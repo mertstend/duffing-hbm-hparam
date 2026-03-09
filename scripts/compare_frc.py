@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
+from src.plotting import frc_with_inset_plot
 
 
-# --------------------- Analytical Solution for Comparison --------------------
+###############################################################################
+# Analytical Solution for Comparison
+###############################################################################
 zeta = 0.05     # damping ratio
 gamma = 0.1     # nonlinearity coefficient
 P = 0.18        # forcing amplitude
@@ -22,7 +23,9 @@ for i, a in enumerate(a_ana):
     Om_ana[i, 1] = np.sqrt(prefactor - np.sqrt(inner))
 valid_ana = (np.isreal(Om_ana[:, 0])) & (np.isreal(Om_ana[:, 1]))
 
-# ---------------------- Load Reference and Test Results ----------------------
+###############################################################################
+# Load Reference and Test Results
+###############################################################################
 ref = pd.read_csv('./results/Duffing_reference_results.csv', header=None)
 test = pd.read_csv('./results/Duffing_testing_results.csv', header=None)
 
@@ -42,39 +45,10 @@ else:
     print('Maximum difference between reference and test results: ' +
           str(max_diff) + RESET)
 
-colorlist = ['#1D3557', '#E63946', '#00b695', "#457B9D"]
-fig, ax = plt.subplots(figsize=(5, 4))
-ax.plot(Om_ana[valid_ana, 0].real, a_ana[valid_ana], '-', color='#A8DADC',
-        label='Analytical (H=1)')
-ax.plot(Om_ana[valid_ana, 1].real, a_ana[valid_ana], '-', color='#A8DADC')
-ax.plot(ref.iloc[0].to_numpy(), ref.iloc[1].to_numpy(), linestyle='-',
-        color=colorlist[0], label='AFT (H=3)')
-ax.plot(test.iloc[0].to_numpy(), test.iloc[1].to_numpy(), linestyle='',
-        marker='.', color=colorlist[1], label='Neural Network (H=3)')
-ax.set_xlim(0.4, 1.7)
-ax.set_ylim(0, 3.0)
-ax.set_xlabel(r'Excitation Frequency $\Omega$')
-ax.set_ylabel(r'Amplitude $a$')
-ax.legend(loc='upper left')
-ax.grid()
-
-axins = inset_axes(ax,
-                   width="30%",
-                   height="30%",
-                   loc='center left',
-                   bbox_to_anchor=(.71, .0, 1.1, 1.2),
-                   bbox_transform=ax.transAxes,
-                   borderpad=0)
-axins.plot(Om_ana[valid_ana, 0].real, a_ana[valid_ana], '-', color='#A8DADC')
-axins.plot(Om_ana[valid_ana, 1].real, a_ana[valid_ana], '-', color='#A8DADC')
-axins.plot(ref.iloc[0].to_numpy(), ref.iloc[1].to_numpy(),
-           linestyle='-', color=colorlist[0])
-axins.plot(test.iloc[0].to_numpy(), test.iloc[1].to_numpy(),
-           linestyle='', marker='.', color=colorlist[1])
-axins.set_xlim(1.24, 1.285)
-axins.set_ylim(2.7, 2.95)
-axins.grid()
-mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
-
-plt.savefig('./figures/duffing_analytical_aft_nn.svg', bbox_inches='tight')
-plt.show()
+frc_with_inset_plot([np.concatenate((Om_ana[valid_ana, 0].real,
+                                    Om_ana[valid_ana, 1].real)),
+                     ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
+                    [np.concatenate((a_ana[valid_ana], a_ana[valid_ana])),
+                     ref.iloc[1].to_numpy(),
+                     test.iloc[1].to_numpy()],
+                    figure_name='duffing_analytical_aft_nn')

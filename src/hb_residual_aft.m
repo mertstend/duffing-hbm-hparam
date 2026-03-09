@@ -39,7 +39,7 @@
 function R = hb_residual_aft(X,mu,zeta,kappa,gamma,P,H,N)
 
 % Save input vector X in every function call
-% fid = fopen('data/nn_input_Duffing.txt', 'a');
+% fid = fopen('data/input_frc_aft.txt', 'a');
 % fprintf(fid, '%s\n', strjoin(string(X), ','));  % with frequency in last index
 % fclose(fid);
 

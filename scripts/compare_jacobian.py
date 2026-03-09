@@ -20,7 +20,7 @@ inv_perm[perm_row_0] = np.arange(len(perm_row_0))
 m, n = 7, 8
 Jsize = m * n
 
-jac_FD = np.loadtxt('data/jac_FD_Duffing.txt', delimiter=',')
+jac_FD = np.loadtxt('data/jacobian_input_frc_aft.txt', delimiter=',')
 J_flat = jac_FD[:, :Jsize]         # (K, 56)
 X_full = jac_FD[:, Jsize:]         # (K, 8)  [a0,a1,b1,a2,b2,a3,b3,Omega]
 K = jac_FD.shape[0]

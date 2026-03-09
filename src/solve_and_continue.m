@@ -338,7 +338,7 @@ while istep<=Sopt.stepmax
     % Ensure forward stepping along solution path
     if Sopt.flag
         if (istep > 2) && ...
-                (transpose(X0-Xold)*(dir*Sopt.ds*z) < 0);
+                (transpose(X0-Xold)*(dir*Sopt.ds*z) < 0)
             XP = X0-dir*Sopt.ds*z;
         end
     end
@@ -537,8 +537,18 @@ end
 %% Output computational effort
 Solinfo.ctime = toc;
 Solinfo.FCtotal = sum(Solinfo.FC);
+% plot NIT, IEx and FC
+figure; plot(Solinfo.NIT); title('NIT');
+ylim([min(Solinfo.NIT) - 0.05*range(Solinfo.NIT), max(Solinfo.NIT) + 0.05*range(Solinfo.NIT)])
+figure; plot(Solinfo.IEx); title('IEx');
+figure; plot(Solinfo.FC); title('FC');
+ylim([min(Solinfo.FC) - 0.05*range(Solinfo.FC), max(Solinfo.FC) + 0.05*range(Solinfo.FC)])
+% print key values
 disp('--------------------');
 disp('COMPUTATIONAL EFFORT:');
+fprintf('NIT: mean = %.2f, max = %d\n', mean(Solinfo.NIT), max(Solinfo.NIT));
+fprintf('FC:  mean = %.2f, max = %d\n', mean(Solinfo.FC),  max(Solinfo.FC));
+fprintf('IEx: max = %d, count(IEx>1) = %d\n', max(Solinfo.IEx), nnz(Solinfo.IEx > 1));
 disp(['Total elapsed time (toc) is ',num2str(Solinfo.ctime,'%16.1f'),' s']);
 disp(['Total number of function evaluations is ', ...
     num2str(Solinfo.FCtotal)]);
@@ -546,7 +556,7 @@ end
 function [Rext,dRextdX] = extended_residual(X,Xref,zref,...
     fun_residual,Sopt)
 %% Evaluation of the residual function and its derivative
-persistent diag_fid_aft diag_fid_nn newton_fid_aft newton_fid_nn newton_iter_aft newton_iter_nn
+persistent file_initialized
 switch Sopt.jac
     case {'full','on'}
         [R,dRdX] = feval(fun_residual,diag(Sopt.Dscale)*X);
@@ -561,53 +571,6 @@ switch Sopt.jac
         dRdlam = (Rp-R)/dlam/Sopt.Dscale(end);
         dRdX = [dRdx dRdlam];
 
-        % --- Diagnostics block ---
-        if isempty(diag_fid_nn)
-            diag_fid_nn = fopen('../diag_solver_nn.csv','w');
-            fprintf(diag_fid_nn, 'Om,normR,smin,smax,cond,stepnorm\n');
-        end
-
-        if isempty(newton_fid_nn)
-            newton_fid_nn = fopen('../newton_log_nn.csv','w');
-            fprintf(newton_fid_nn,'Om,newton_iter,normR,stepnorm\n');
-        end
-
-        if isempty(newton_iter_nn)
-            newton_iter_nn = 0;
-        end
-
-        normR = norm(R);
-
-        % robuste smin/smax nur wenn Matrix nicht winzig ist
-        try
-            smin = svds(dRdX, 1, 'smallest');
-            smax = svds(dRdX, 1, 'largest');
-            cnd  = smax / max(smin, eps);
-        catch
-            smin = NaN; smax = NaN; cnd = NaN;
-        end
-
-        % Newton step
-        try
-            step = -dRdX \ R;
-            stepnorm = norm(step);
-        catch
-            stepnorm = NaN;
-        end
-
-        % Newton iteration counter
-        newton_iter_nn = newton_iter_nn + 1;
-
-        Om = X(end);
-
-        fprintf(newton_fid_nn,'%.16e,%d,%.16e,%.16e\n', ...
-            Om, newton_iter_nn, normR, stepnorm);
-
-        fprintf(diag_fid_nn,'%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
-            Om, normR, smin, smax, cnd, stepnorm);
-
-        % --- end diagnostics ---
-
     otherwise
         R = feval(fun_residual,diag(Sopt.Dscale)*X);
         Smyopt = struct('epsrel',Sopt.epsFD,'epsabs',Sopt.epsFD, ...
@@ -615,64 +578,22 @@ switch Sopt.jac
         dRdX = finite_difference_jacobian(fun_residual,...
             diag(Sopt.Dscale)*X,Smyopt);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        smin = svds(dRdX, 1, 'smallest');
-        Om = X(end);
-        fid = fopen('../smin_FD_Duffing.txt', 'a');  
-        fprintf(fid, '%s\n', strjoin(string([smin, Om]), ','));
-        fclose(fid);
+        % Save finite difference Jacobian in AFT run
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        filename = './data/jacobian_input_frc_aft.txt';
+        if isempty(file_initialized)
+            if exist(filename, 'file')
+                delete(filename);
+            end
+            file_initialized = true;
+        end
         row = [dRdX(:).' , X.'];
-        fid = fopen('../jac_FD_Duffing.txt','a');
+        fid = fopen(filename,'a');
         fprintf(fid, '%.16e,', row(1:end-1));
         fprintf(fid, '%.16e\n', row(end));
         fclose(fid);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % --- Diagnostics block ---
 
-        if isempty(diag_fid_aft)
-            diag_fid_aft = fopen('../diag_solver.csv','w');
-            fprintf(diag_fid_aft, 'Om,normR,smin,smax,cond,stepnorm\n');
-        end
-
-        if isempty(newton_fid_aft)
-            newton_fid_aft = fopen('../newton_log.csv','w');
-            fprintf(newton_fid_aft,'Om,newton_iter,normR,stepnorm\n');
-        end
-
-        if isempty(newton_iter_aft)
-            newton_iter_aft = 0;
-        end
-
-        normR = norm(R);
-
-        % robuste smin/smax nur wenn Matrix nicht winzig ist
-        try
-            smin = svds(dRdX, 1, 'smallest');
-            smax = svds(dRdX, 1, 'largest');
-            cnd  = smax / max(smin, eps);
-        catch
-            smin = NaN; smax = NaN; cnd = NaN;
-        end
-
-        % Newton step
-        try
-            step = -dRdX \ R;
-            stepnorm = norm(step);
-        catch
-            stepnorm = NaN;
-        end
-
-        % Newton iteration counter
-        newton_iter_aft = newton_iter_aft + 1;
-
-        Om = X(end);
-
-        fprintf(newton_fid_aft,'%.16e,%d,%.16e,%.16e\n', ...
-            Om, newton_iter_aft, normR, stepnorm);
-
-        fprintf(diag_fid_aft,'%.16e,%.16e,%.16e,%.16e,%.16e,%.16e\n', ...
-            Om, normR, smin, smax, cnd, stepnorm);
-
-        % --- end diagnostics ---
 end
 
 %% Evaluation of the parametrization constraint equation and its derivative

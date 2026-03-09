@@ -40,7 +40,7 @@ individual_error_metrics_bar_plot(individual_metrics_test,
 ###############################################################################
 # Performance on FRC trajectory
 ###############################################################################
-q_frc_full = np.loadtxt('data/nn_input_Duffing.txt', delimiter=',')
+q_frc_full = np.loadtxt('data/input_frc_aft.txt', delimiter=',')
 q_rel = np.concatenate([q_frc_full[:, 1:3], q_frc_full[:, 5:7]], axis=1)
 
 H = 3

@@ -115,15 +115,15 @@ if MODE == 'train':
         # save current date to be able to load the model later
         save_date = np.datetime64('now').astype('str').replace(
             ':', '-').replace('T', '_')
-        torch.save(model, 'models/MLP_Duffing_H3_'+save_date+'.pt')
+        torch.save(model, 'models/duffing_mlp_h3_'+save_date+'.pt')
         joblib.dump({'train_losses': train_data_losses,
                      'validation_losses': validation_losses},
-                    'models/losses_Duffing_H3_'+save_date+'.joblib')
+                    'models/duffing_losses_h3_'+save_date+'.joblib')
         print(f"Model and scaler saved with date id {save_date}")
 
 
 if MODE == 'inference':
-    model = torch.load('models/MLP_Duffing_H3_'+model_id+'.pt',
+    model = torch.load('models/duffing_mlp_h3_'+model_id+'.pt',
                        weights_only=False)
     model.eval()
 

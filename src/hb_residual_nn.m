@@ -40,7 +40,7 @@
 %========================================================================
 function [R, dR, Q] = hb_residual_nn(X,mu,zeta,kappa,gamma,P,H,N)
 
-persistent pyModule2 pyModule3
+persistent pyModule1 pyModule2
 
 mFileFolder = fileparts(mfilename('fullpath'));
 [~, folderName] = fileparts(mFileFolder);  % check whether the current folder is 'scripts'
@@ -53,21 +53,15 @@ if count(py.sys.path, pyFolder) == 0
     insert(py.sys.path, int32(0), pyFolder);  % add the current folder to Python sys.path 
 end
 
-if isempty(pyModule2) || isempty(pyModule3)
-    pyModule2 = py.importlib.import_module('aicim_pkg.utils.NN_wrapper');
-    pyModule3 = py.importlib.import_module('aicim_pkg.utils.NN_jacobian');
+if isempty(pyModule1) || isempty(pyModule2)
+    pyModule1 = py.importlib.import_module('src.nn_inference');
+    pyModule2 = py.importlib.import_module('src.nn_jacobian');
 end
-%pyModule1 = py.importlib.import_module('aicim_pkg.utils.AFT_Duffing');   
-%py.importlib.reload(pyModule1);  % might slow down the code
-%pyModule2 = py.importlib.import_module('aicim_pkg.utils.NN_wrapper');
-%py.importlib.reload(pyModule2);  % might slow down the code
-%pyModule3 = py.importlib.import_module('aicim_pkg.utils.NN_jacobian');
-%py.importlib.reload(pyModule3);  % might slow down the code
 
 % Nonlinear force vector with NN needs input in cosine-sine form
 NN_id = '2026-02-18_13-29-30';  % Identifier of the trained NN model
 nn_input = [X(2:3).', X(6:7).'];
-nn_output = double(pyModule2.evaluate_Duffing_nn_H3(NN_id, nn_input));
+nn_output = double(pyModule1.evaluate_Duffing_nn_H3(NN_id, nn_input));
 Fnl_cs = [0, nn_output(1:2), 0, 0, nn_output(3:4)];
 Fnl_ce = [flipud(((Fnl_cs(2:2:end) + 1i * Fnl_cs(3:2:end))/2).'); ...
     Fnl_cs(1); ...
@@ -84,10 +78,6 @@ Om = X(end);
 % P is the magnitude of the cosine forcing
 Fex_ce = [zeros(H-1,1);P/2;0;P/2; zeros(H-1 ,1)];
 
-% Nonlinear force vector with AFT needs input in complex-exponential form
-% Fnl_ce = AFT_Duffing(N, H, Q_ce, gamma);  % matlab AFT
-% Fnl_ce = double(pyModule1.compute_AFT_solution(N, H, Q_ce, gamma));  % python AFT
-
 % Dynamic force equilibrium
 R_ce = ( -((-H:H)'*Om).^2 * mu + 1i*(-H:H)'*Om * zeta + kappa ).* Q_ce+...
     Fnl_ce-Fex_ce;
@@ -98,13 +88,7 @@ R = [real(R_ce(H+1)); ...
 
 nonlinear_term = 'NN';
 evaluate_coefficients = 0;
-dR = double(pyModule3.NN_jacobian_Duffing_H3(reshape(X(1:end-1), 1, []), mu, zeta, kappa, gamma, P, H, N, nonlinear_term, NN_id, evaluate_coefficients, Om));
-% smin = svds(dR, 1, 'smallest');
-% Save samllest singular value of Jacobian and current frequency in every function call
-% fid = fopen('data/smin_jacobian_Duffing.txt', 'a');
-% fprintf(fid, '%s\n', strjoin(string([smin, Om]), ','));
-% fclose(fid);
-% dR = [dR, zeros(size(X,1)-1,1)];
+dR = double(pyModule2.NN_jacobian_Duffing_H3(reshape(X(1:end-1), 1, []), mu, zeta, kappa, gamma, P, H, N, nonlinear_term, NN_id, evaluate_coefficients, Om));
 
 % Conversion from sine-cosine to complex-exponential representation
 n = 1;
@@ -114,12 +98,10 @@ Q = zeros(n*(H+1),1);
 Q(I0) = X(I0);
 Q(ID) = X(IC)-1i*X(IS);
 
-% --- ALIGN TO AFT CONVENTION (ordering + scaling) ---
+% Align to AFT convention (ordering + scaling)
 perm_row = [1 2 4 6 3 5 7];
 alpha = 0.5;
-
 R = alpha * R(perm_row);
-
 if nargout > 1
     dR = alpha * dR(perm_row, :);
 end

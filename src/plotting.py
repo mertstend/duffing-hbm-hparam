@@ -17,7 +17,7 @@ four_colors_set = ['#1D3557', '#008b9a', '#f19699', '#e63946']
 
 def error_metrics_spider_plot(metrics_dict,
                               normalized_metrics_dict,
-                              figure_name):
+                              figure_name, save_figure=False):
     """
     Create a spider plot comparing error metrics before and after
     normalization.
@@ -50,13 +50,14 @@ def error_metrics_spider_plot(metrics_dict,
     ax.set_ylim(0, max(values + values_norm)*1.1)
     ax.legend(loc='upper center', bbox_to_anchor=(.5, 1.2), ncol=2)
     plt.tight_layout()
-    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
 def individual_error_metrics_bar_plot(metrics_dict,
                                       normalized_metrics_dict,
-                                      figure_name):
+                                      figure_name, save_figure=False):
     """
     Create a bar plot comparing error metrics of individual outputs before and
     after normalization.
@@ -85,12 +86,13 @@ def individual_error_metrics_bar_plot(metrics_dict,
     ax[0].set_ylabel("error (0 = better)")
     ax[1].legend(title="output")
     plt.tight_layout()
-    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
 def individual_normalized_mse_bar_plot(normalized_metrics_dict,
-                                       figure_name):
+                                       figure_name, save_figure=False):
     norm = normalized_metrics_dict['MSE']
     x = np.arange(len(norm))
     w = 0.4
@@ -100,7 +102,8 @@ def individual_normalized_mse_bar_plot(normalized_metrics_dict,
     ax.set_xticklabels(output_labels)
     ax.set_ylabel("normalized mean squared error")
     plt.tight_layout()
-    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
@@ -137,7 +140,8 @@ def coefficients_over_iterations_plot(input_coeffs, aft_outputs, nn_outputs):
     plt.show()
 
 
-def prediciton_vs_ground_truth_plot(ground_truth, prediction):
+def prediciton_vs_ground_truth_plot(ground_truth, prediction, figure_name,
+                                    save_figure=False):
     """
     Create a scatter plot comparing predicted coefficients vs. ground truth.
     Parameters
@@ -146,6 +150,10 @@ def prediciton_vs_ground_truth_plot(ground_truth, prediction):
         List of ground truth coefficient arrays to compare.
     prediction : list of np.ndarray
         List of predicted coefficient arrays to compare.
+    figure_name : str
+        Name of the figure file to save.
+    save_figure : bool, optional
+        Whether to save the figure, by default False.
     """
     fig, ax = plt.subplots(1, 4, figsize=(15, 4))
     markers = ['.', 'x']
@@ -161,11 +169,14 @@ def prediciton_vs_ground_truth_plot(ground_truth, prediction):
         ax[i].legend()
     plt.suptitle('ground truth vs. prediction')
     plt.tight_layout()
+    if save_figure:
+        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
 def all_predictions_vs_ground_truths_inset_plot(ground_truth, prediction,
-                                                figure_name):
+                                                figure_name,
+                                                save_figure=False):
     fig, ax = plt.subplots(1, 1, figsize=(4.4, 3))
     fig.subplots_adjust(left=0.15, right=0.7, bottom=0.15, top=0.95)
     for i in range(4):
@@ -196,11 +207,12 @@ def all_predictions_vs_ground_truths_inset_plot(ground_truth, prediction,
     axins.set_yticks([0.1, 0.2])
     mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
 
-    plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
-def frf_plot(frequencies, amplitudes, figure_name):
+def frf_plot(frequencies, amplitudes, figure_name, save_figure=False):
     """
     Create a plot of the Frequency Response Function (FRF) with an inset
     zooming in on the region around the resonance peak.
@@ -221,11 +233,13 @@ def frf_plot(frequencies, amplitudes, figure_name):
     ax.set_ylabel(r'Amplitude $a$')
     ax.legend(loc='upper left')
     ax.grid()
-    plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 
-def frf_with_inset_plot(frequencies, amplitudes, figure_name):
+def frf_with_inset_plot(frequencies, amplitudes, figure_name,
+                        save_figure=False):
     """
     Create a plot of the Frequency Response Function (FRF) with an inset
     zooming in on the region around the resonance peak.
@@ -267,7 +281,8 @@ def frf_with_inset_plot(frequencies, amplitudes, figure_name):
     axins.set_ylim(2.7, 2.95)
     axins.grid()
     mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
-    plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
+    if save_figure:
+        plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
     plt.show()
 
 

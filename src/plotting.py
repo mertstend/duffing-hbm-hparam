@@ -499,7 +499,7 @@ def smin_over_omega(smin_list, Omega, min_y, max_y, figure_name,
     for smin, color, label in zip(smin_list, two_colors_set, labels):
         ax.semilogy(Omega, smin, '.', label=label, alpha=0.7, color=color)
     ax.set_xlim(0.4, 1.7)
-    ax.set_ylim(min_y-10*min_y, max_y+10*max_y)
+    ax.set_ylim(min_y/10, max_y*10)
     ax.set_xlabel(r"Excitation frequency $\Omega$")
     ax.set_ylabel(r"Smallest singular value $\sigma_{\min}(J)$")
     ax.grid(True)
@@ -517,7 +517,7 @@ def cond_over_omega(cond_list, Omega, min_y, max_y, figure_name,
     for cond, color, label in zip(cond_list, two_colors_set, labels):
         ax.semilogy(Omega, cond, '.', label=label, alpha=0.7, color=color)
     ax.set_xlim(0.4, 1.7)
-    ax.set_ylim(min_y-10*min_y, max_y+10*max_y)
+    ax.set_ylim(min_y/10, max_y*10)
     ax.set_xlabel(r"Excitation frequency $\Omega$")
     ax.set_ylabel(r"Condition number $\kappa(J)$")
     ax.grid(True)

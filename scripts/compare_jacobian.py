@@ -83,8 +83,13 @@ for k in range(K):
     cond_fd[k] = sv_fd[0] / max(sv_fd[-1], 1e-14)
     cond_nn[k] = sv_nn[0] / max(sv_nn[-1], 1e-14)
 
-print("FD: min smin =", np.min(smin_fd), " max cond =", np.max(cond_fd))
-print("NN: min smin =", np.min(smin_nn), " max cond =", np.max(cond_nn))
+print("Smallest singular values")
+print("FD: min smin =", np.min(smin_fd))
+print("NN: min smin =", np.min(smin_nn))
+
+print("\nCondition numbers")
+print("FD: max cond =", np.max(cond_fd))
+print("NN: max cond =", np.max(cond_nn))
 
 
 ###############################################################################
@@ -124,7 +129,7 @@ for k in range(len(X)):
     lin_err_fd.append(np.linalg.norm(Rfd))
     lin_err_nn.append(np.linalg.norm(Rnn))
 
-print("Linearisation quality")
+print("\nLinearisation quality")
 print("FD mean:", np.mean(lin_err_fd))
 print("NN mean:", np.mean(lin_err_nn))
 

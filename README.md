@@ -47,8 +47,15 @@ All executable scripts for reproducing the results are in the folder [`scripts`]
 [<img src="gamm_duffing_hbm_nn.svg" height="600">](gamm_duffing_hbm_nn.svg)
 
 ## Citation
-If you use this code, please cite it using the metadata provided in
-[CITATION.cff](CITATION.cff).
+If you use this code in your research, please cite:
+```bibtex
+@software{goldack2026duffing_hbm_nn,
+    author = {Goldack, Miriam},
+    title = {Code for: Learning Duffing-Type Forces for the Harmonic Balance Method Using Neural Networks},
+    year = {2026},
+    url = {https://github.com/MiriamAlina/gamm-duffing-hbm-nn}
+}
+```
 
 ## License
 GNU General Public License v3.0

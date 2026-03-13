@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "Learning Duffing-Type Forces for the Harmonic Balance Method Using Neural Networks"
+title: "Code for: Learning Duffing-Type Forces for the Harmonic Balance Method Using Neural Networks"
 message: "If you use this software, please cite it as below."
 type: software
 authors:

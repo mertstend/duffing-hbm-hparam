@@ -21,6 +21,12 @@ The project was developed with:
 - Python 3.12.11  
 - MATLAB R2025a  
 
+The required MATLAB add-ons are:
+
+- Optimization Toolbox
+- Simulink
+- Statistics and Machine Learning Toolbox
+
 Install the required Python packages:
 
 ```bash

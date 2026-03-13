@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: "Learning Duffing-Type Forces for the Harmonic Balance Method Using Neural Networks"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Goldack
+    given-names: Miriam
+repository-code: "https://github.com/MiriamAlina/gamm-duffing-hbm-nn"
+license: GPL-3.0
+version: 1.0.0
+keywords:
+  - harmonic balance
+  - nonlinear dynamics
+  - duffing oscillator
+  - neural networks

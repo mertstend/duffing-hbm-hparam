@@ -34,8 +34,14 @@ pip install -e .
 ```
 
 ## Workflow Overview
-The diagram below summarizes the overall process, including data generation, neural network training, and evaluation at both the coefficient level and within the physical model integration.  
+The diagram below summarizes the overall process, including data generation, neural network training, and evaluation at both the coefficient predictions and within the physical system integration.  
+
 [<img src="gamm_duffing_hbm_nn.svg" height="600">](gamm_duffing_hbm_nn.svg)
+
+## Citation
+## Citation
+If you use this code, please cite it using the metadata provided in
+[CITATION.cff](CITATION.cff).
 
 ## License
 GNU General Public License v3.0

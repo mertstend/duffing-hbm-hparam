@@ -39,7 +39,6 @@ The diagram below summarizes the overall process, including data generation, neu
 [<img src="gamm_duffing_hbm_nn.svg" height="600">](gamm_duffing_hbm_nn.svg)
 
 ## Citation
-## Citation
 If you use this code, please cite it using the metadata provided in
 [CITATION.cff](CITATION.cff).
 

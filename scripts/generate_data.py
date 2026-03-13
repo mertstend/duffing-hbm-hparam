@@ -1,10 +1,17 @@
 import numpy as np
 from time import strftime
 from sklearn.model_selection import train_test_split
+from src.util import check_folder_structure
 from src.aft import compute_AFT_solution
 from src.fourier_conversion import (convert_cossin_to_comexp,
                                     convert_comexp_to_cossin)
 from src.trajectory_sampling import sample_along_trajectory
+
+
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
 
 
 SAVE_DATA = True

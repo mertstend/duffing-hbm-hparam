@@ -1,7 +1,15 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from src.util import check_folder_structure
 from src.plotting import (training_data_distribution_violinplot,
                           training_data_distribution_histogram,
                           frc_and_training_inputs_3d_scatter_plot)
+
+
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
 
 
 data_load_date = '2026-02-18_14-04-47'
@@ -22,3 +30,5 @@ q_rel = np.loadtxt('data/input_frc_aft.txt', delimiter=',')
 frc_and_training_inputs_3d_scatter_plot(q_rel, q_data,
                                         figure_name='duffing_training_samples',
                                         save_figure=False)
+
+plt.show()

@@ -1,27 +1,15 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from src.util import check_folder_structure
 from src.plotting import frc_plot, frc_with_inset_plot
 
 
 ###############################################################################
-# Analytical Solution for Comparison
+# Check folder structure
 ###############################################################################
-zeta = 0.05     # damping ratio
-gamma = 0.1     # nonlinearity coefficient
-P = 0.18        # forcing amplitude
-a_min = .1      # minimum amplitude for analytical solution
-a_max = 3       # maximum amplitude for analytical solution
-a_ana = np.linspace(a_min, a_max, 50)  # amplitudes for analytical solution
-# For each amplitude, determine the two associated excitation frequencies.
-# Only the real-valued solutions exist.
-Om_ana = np.zeros((len(a_ana), 2), dtype=complex)
-for i, a in enumerate(a_ana):
-    prefactor = 1 - zeta**2 / 2 + 3 * gamma * a**2 / 4
-    inner = P**2 / a**2 + zeta**4 / 4 - zeta**2 - \
-        3 * zeta**2 * gamma * a**2 / 4
-    Om_ana[i, 0] = np.sqrt(prefactor + np.sqrt(inner))
-    Om_ana[i, 1] = np.sqrt(prefactor - np.sqrt(inner))
-valid_ana = (np.isreal(Om_ana[:, 0])) & (np.isreal(Om_ana[:, 1]))
+check_folder_structure()
+
 
 ###############################################################################
 # Load Reference and Test Results
@@ -54,3 +42,5 @@ frc_plot(ref.iloc[0].to_numpy(),
 frc_with_inset_plot([ref.iloc[0].to_numpy(), test.iloc[0].to_numpy()],
                     [ref.iloc[1].to_numpy(), test.iloc[1].to_numpy()],
                     figure_name='duffing_aft_nn')
+
+plt.show()

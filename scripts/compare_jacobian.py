@@ -1,10 +1,21 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from src.util import check_folder_structure
 from src.nn_jacobian import NN_jacobian_Duffing_H3
 from src.plotting import (gradients_over_inputs_plot,
                           smin_over_omega,
                           cond_over_omega)
 
 
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
+
+
+###############################################################################
+# Load FD Jacobian saved from MATLAB
+###############################################################################
 # different ordering conventions for the Jacobian rows (output variables):
 # NN order: (a0, a1, b1, a2, b2, a3, b3)
 # AFT order: (a0, a1, a2, a3, b1, b2, b3)
@@ -14,10 +25,6 @@ alpha = 0.5  # scaling factor due to conversions from ce to cs within AFT
 inv_perm = np.empty_like(perm_row_0)
 inv_perm[perm_row_0] = np.arange(len(perm_row_0))
 
-
-###############################################################################
-# Load FD Jacobian saved from MATLAB
-###############################################################################
 m, n = 7, 8
 Jsize = m * n
 
@@ -147,3 +154,5 @@ for k in range(len(J_nn)-1):
 print("\nJacobian smoothness")
 print("FD mean change:", np.mean(smooth_fd))
 print("NN mean change:", np.mean(smooth_nn))
+
+plt.show()

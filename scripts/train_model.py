@@ -3,6 +3,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import joblib
+from src.util import check_folder_structure
+
+
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
 
 
 ###############################################################################

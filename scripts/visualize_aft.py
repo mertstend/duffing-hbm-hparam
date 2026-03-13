@@ -1,6 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from src.util import check_folder_structure
 from src.plotting import aft_process_visualization_plot
 
+
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
 
 H = 3
 N = 256
@@ -22,3 +29,5 @@ q3_F = np.fft.fft(q3_T)
 aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F[:H],
                                figure_name='aft_process_visualization',
                                save_figure=False)
+
+plt.show()

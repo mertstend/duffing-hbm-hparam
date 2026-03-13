@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from src.util import check_folder_structure
 from src.aft import compute_AFT_solution
 from src.fourier_conversion import (convert_cossin_to_comexp,
                                     convert_comexp_to_cossin)
@@ -9,6 +11,12 @@ from src.plotting import (error_metrics_spider_plot,
                           individual_normalized_mse_bar_plot,
                           coefficients_over_iterations_plot,
                           prediction_vs_ground_truth_inset_plot)
+
+
+###############################################################################
+# Check folder structure
+###############################################################################
+check_folder_structure()
 
 
 ###############################################################################
@@ -89,3 +97,5 @@ error_metrics_spider_plot(global_metrics_frc, global_metrics_frc_normalized,
                           save_figure=False)
 
 coefficients_over_iterations_plot(q_rel, fnl_rel_aft, fnl_rel_nn)
+
+plt.show()

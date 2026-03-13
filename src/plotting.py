@@ -54,7 +54,6 @@ def error_metrics_spider_plot(metrics_dict,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def individual_error_metrics_bar_plot(metrics_dict,
@@ -92,7 +91,6 @@ def individual_error_metrics_bar_plot(metrics_dict,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def individual_normalized_mse_bar_plot(normalized_metrics_dict,
@@ -108,7 +106,6 @@ def individual_normalized_mse_bar_plot(normalized_metrics_dict,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def coefficients_over_iterations_plot(input_coeffs, aft_outputs, nn_outputs):
@@ -135,7 +132,6 @@ def coefficients_over_iterations_plot(input_coeffs, aft_outputs, nn_outputs):
     ax[3].legend(loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.02))
     ax[3].set_title('Difference of AFT and NN outputs over iterations')
     plt.tight_layout()
-    plt.show()
 
 
 def prediction_vs_ground_truth_inset_plot(ground_truth, prediction,
@@ -173,7 +169,6 @@ def prediction_vs_ground_truth_inset_plot(ground_truth, prediction,
 
     if save_figure:
         plt.savefig(f'figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def frc_plot(frequencies, amplitudes, figure_name, save_figure=False):
@@ -199,7 +194,6 @@ def frc_plot(frequencies, amplitudes, figure_name, save_figure=False):
     ax.grid()
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def frc_with_inset_plot(frequencies, amplitudes, figure_name,
@@ -247,7 +241,6 @@ def frc_with_inset_plot(frequencies, amplitudes, figure_name,
     mark_inset(ax, axins, loc1=3, loc2=1, fc="none", ec="0.5")
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def training_data_distribution_violinplot(inputs, outputs, figure_name,
@@ -279,7 +272,6 @@ def training_data_distribution_violinplot(inputs, outputs, figure_name,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def training_data_distribution_histogram(inputs, outputs, figure_name,
@@ -309,7 +301,6 @@ def training_data_distribution_histogram(inputs, outputs, figure_name,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def frc_and_training_inputs_3d_scatter_plot(frc_inputs,
@@ -373,7 +364,6 @@ def frc_and_training_inputs_3d_scatter_plot(frc_inputs,
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.png', dpi=300,
                     bbox_inches='tight')
-    plt.show()
 
 
 def loss_plot(train_loss, val_loss, figure_name, save_figure=False):
@@ -398,7 +388,6 @@ def loss_plot(train_loss, val_loss, figure_name, save_figure=False):
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name,
@@ -444,7 +433,6 @@ def aft_process_visualization_plot(k, t, q_F, q_T, q3_T, q3_F, figure_name,
     plt.tight_layout()
     if save_figure:
         plt.savefig(f'./figures/{figure_name}.svg', bbox_inches='tight')
-    plt.show()
 
 
 def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name,
@@ -489,7 +477,6 @@ def gradients_over_inputs_plot(inputs, fd_jacobian, nn_jacobian, figure_name,
     fig.tight_layout(rect=[0, 0.08, 1, 1])
     if save_figure:
         plt.savefig(f"figures/{figure_name}.png", dpi=300, bbox_inches="tight")
-    plt.show()
 
 
 def smin_over_omega(smin_list, Omega, min_y, max_y, figure_name,
@@ -507,7 +494,6 @@ def smin_over_omega(smin_list, Omega, min_y, max_y, figure_name,
     fig.tight_layout(rect=[0, 0, 1, 1])
     if save_figure:
         plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
-    plt.show()
 
 
 def cond_over_omega(cond_list, Omega, min_y, max_y, figure_name,
@@ -525,4 +511,3 @@ def cond_over_omega(cond_list, Omega, min_y, max_y, figure_name,
     fig.tight_layout(rect=[0, 0, 1, 1])
     if save_figure:
         plt.savefig(f"figures/{figure_name}.svg", bbox_inches="tight")
-    plt.show()

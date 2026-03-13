@@ -42,6 +42,8 @@ pip install -e .
 ## Workflow Overview
 The diagram below summarizes the overall process, including data generation, neural network training, and evaluation at both the coefficient predictions and within the physical system integration.  
 
+All executable scripts for reproducing the results are in the folder [`scripts`](scripts). The folder [`src`](src) contains helper functions.  
+
 [<img src="gamm_duffing_hbm_nn.svg" height="600">](gamm_duffing_hbm_nn.svg)
 
 ## Citation

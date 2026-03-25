@@ -7,6 +7,26 @@ from src.util import check_folder_structure
 
 
 ###############################################################################
+# Define custom NMSE loss function
+###############################################################################
+class NMSELoss(nn.Module):
+    def __init__(self):
+        super(NMSELoss, self).__init__()
+
+    def forward(self, predictions, targets):
+        # Calculate Mean Squared Error
+        mse = torch.mean((predictions - targets) ** 2)
+
+        # Calculate Variance (or Mean Squared Value) of targets
+        # Using MSE of target relative to 0 is common
+        target_norm = torch.mean(targets ** 2)
+
+        # Calculate Normalized MSE
+        nmse = mse / (target_norm + 1e-8)  # 1e-8 to avoid division by zero
+        return nmse
+
+
+###############################################################################
 # Check folder structure
 ###############################################################################
 check_folder_structure()
@@ -15,7 +35,7 @@ check_folder_structure()
 ###############################################################################
 # hyperparameters
 ###############################################################################
-SAVE = False  # whether to save the trained model
+SAVE = True  # whether to save the trained model
 if not SAVE:
     RED = "\033[91m"
     RESET = "\033[0m"
@@ -23,7 +43,7 @@ if not SAVE:
           f'set SAVE = True. Press Enter to continue...{RESET}')
 model_id = '2026-02-18_13-29-30'
 data_id = '2026-02-18_14-04-47'
-n_epochs = 1
+n_epochs = 1000
 batch_size = 10
 
 ###############################################################################
@@ -75,7 +95,7 @@ model = nn.Sequential(
     nn.Linear(32, 4)
 )
 
-loss_fn = nn.MSELoss()
+loss_fn = NMSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(

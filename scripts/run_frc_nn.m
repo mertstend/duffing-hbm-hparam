@@ -43,8 +43,8 @@ P = 0.18;
 % Analysis parameters
 H = 3;      % harmonic order
 N = 4*H+1;  % number of time samples per period, cf. Appendix A in https://doi.org/10.1016/j.ymssp.2019.106503
-Om_s = 1.6;  % start frequency
-Om_e = .5; % end frequency
+Om_s = .5;  % start frequency
+Om_e = 1.6; % end frequency
 
 % Initial guess (from underlying linear system)
 Q = (-Om_s^2*mu+1i*Om_s*zeta+kappa)\P;

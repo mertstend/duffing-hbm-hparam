@@ -62,6 +62,28 @@ X_val = val_data['q_coeffs']
 y_val = val_data['fnl_coeffs']
 
 ###############################################################################
+# compute scaling parameters from training data only
+###############################################################################
+X_mean = X_train.mean(axis=0)
+X_std = X_train.std(axis=0)
+X_std[X_std == 0] = 1.0
+
+y_mean = y_train.mean(axis=0)
+y_std = y_train.std(axis=0)
+y_std[y_std == 0] = 1.0
+
+###############################################################################
+# scale data
+###############################################################################
+X_train = (X_train - X_mean) / X_std
+X_val = (X_val - X_mean) / X_std
+X_test = (X_test - X_mean) / X_std
+
+y_train = (y_train - y_mean) / y_std
+y_val = (y_val - y_mean) / y_std
+y_test = (y_test - y_mean) / y_std
+
+###############################################################################
 # convert to PyTorch tensors
 ###############################################################################
 X_train = torch.tensor(X_train, dtype=torch.float32)
@@ -95,7 +117,7 @@ model = nn.Sequential(
     nn.Linear(32, 4)
 )
 
-loss_fn = NMSELoss()
+loss_fn = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -168,6 +190,12 @@ if SAVE:
     joblib.dump({'train_losses': train_data_losses,
                  'validation_losses': validation_losses},
                 f'models/duffing_losses_h3_{save_date}.joblib')
+    joblib.dump({
+        'X_mean': X_mean,
+        'X_std': X_std,
+        'y_mean': y_mean,
+        'y_std': y_std
+    }, f'models/duffing_scaler_h3_{save_date}.joblib')
     print(f'Model and scaler saved with date id {save_date}')
 
 print('\nTrained model:')

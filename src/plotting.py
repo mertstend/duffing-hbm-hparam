@@ -383,7 +383,6 @@ def loss_plot(train_loss, val_loss, figure_name, save_figure=False):
     plt.semilogy(val_loss, color=two_colors_set[1], label='Validation loss')
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-    plt.grid(True)
     plt.legend()
     plt.tight_layout()
     if save_figure:

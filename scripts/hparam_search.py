@@ -19,8 +19,8 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 # -- settings ------------------------------------------------------------------
 
-DATA_ID           = '2026-02-18_14-04-47'
-N_TRIALS          = 200
+DATA_ID           = '2026-02-18_14-04-47'  # name of the data set
+N_TRIALS          = 15
 SAVE              = True
 TRIAL_N_EPOCHS    = 800
 TRIAL_ES_PATIENCE = 100
@@ -128,6 +128,7 @@ print(f'\nStudy complete — {N_TRIALS} trials ({n_complete} complete, {n_pruned
 # Optimization history: each trial's val loss + running best (Optuna built-in)
 optuna.visualization.matplotlib.plot_optimization_history(study)
 plt.tight_layout()
+plt.yscale('log')
 if SAVE:
     plt.savefig(f'figures/optuna_history_{save_date}.svg', bbox_inches='tight')
 
@@ -139,6 +140,13 @@ for k, v in study.best_params.items():
 df = study.trials_dataframe(attrs=('number', 'value', 'params', 'state'))
 df = df[df['state'] == 'COMPLETE'].sort_values('value').head(5)
 print(f'\nTop 5 trials:\n{df.to_string(index=False)}')
+
+if SAVE:
+    with open(f'models/hparamsearch_top5_{save_date}.txt', 'w') as f:
+        f.write(f'Top 5 trials — hyperparameter search {save_date}\n')
+        f.write('=' * 55 + '\n\n')
+        f.write(df.to_string(index=False))
+        f.write('\n')
 
 # -- re-train with best hyperparameters and a full training budget -------------
 

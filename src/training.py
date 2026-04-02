@@ -281,3 +281,87 @@ def save_artifacts(
     joblib.dump(history, f'models/duffing_losses_h3_{model_id}.joblib')
     joblib.dump(scaler,  f'models/duffing_scaler_h3_{model_id}.joblib')
     print(f'Artifacts saved with id {model_id}')
+
+
+def load_artifacts(model_id: str) -> tuple[nn.Module, dict, dict]:
+    """Load model, scaler, and loss history saved by ``save_artifacts``.
+
+    Parameters
+    ----------
+    model_id : str
+        The timestamp string used when the artifacts were saved, e.g.
+        ``'2026-03-25_16-59-05'``.
+
+    Returns
+    -------
+    model   : nn.Module   — restored PyTorch model (eval mode)
+    scaler  : dict        — keys: X_mean, X_std, y_mean, y_std
+    history : dict        — keys: train_losses, val_losses, best_val_loss,
+                            pruned, stopped_early
+    """
+    model   = torch.load(f'models/duffing_mlp_h3_{model_id}.pt', weights_only=False)
+    scaler  = joblib.load(f'models/duffing_scaler_h3_{model_id}.joblib')
+    history = joblib.load(f'models/duffing_losses_h3_{model_id}.joblib')
+    model.eval()
+    return model, scaler, history
+
+
+def display_model_info(model: nn.Module, scaler: dict, history: dict, model_id: str = '') -> None:
+    """Print a summary of a loaded model to the console.
+
+    Covers three aspects:
+    - Architecture: layer structure and trainable parameter count.
+    - Scaler: per-feature mean and standard deviation for inputs and outputs.
+    - Training history: epochs run, best validation loss, early-stopping status.
+
+    Parameters
+    ----------
+    model    : nn.Module  — the loaded model
+    scaler   : dict       — as returned by ``load_artifacts``
+    history  : dict       — as returned by ``load_artifacts``
+    model_id : str        — optional identifier shown in the header
+    """
+    sep   = '=' * 55
+    thin  = '-' * 55
+
+    header = f'  Model: duffing_mlp_h3_{model_id}' if model_id else '  Model'
+    print(f'\n{sep}\n{header}\n{sep}')
+
+    # ---------------------------------------------------------------- architecture --
+    print('\nArchitecture')
+    print(thin)
+    print(model)
+
+    # Count trainable parameters
+    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    # Extract input/output sizes from first and last Linear layers
+    linear_layers = [m for m in model.modules() if isinstance(m, nn.Linear)]
+    in_features  = linear_layers[0].in_features  if linear_layers else '?'
+    out_features = linear_layers[-1].out_features if linear_layers else '?'
+
+    print(f'Inputs : {in_features}   Outputs : {out_features}')
+    print(f'Trainable parameters: {n_params:,}')
+
+    # -------------------------------------------------------------------- scaler --
+    print('\nScaler')
+    print(thin)
+    np.set_printoptions(precision=4, suppress=True)
+    print(f'  X  mean : {scaler["X_mean"]}')
+    print(f'     std  : {scaler["X_std"]}')
+    print(f'  y  mean : {scaler["y_mean"]}')
+    print(f'     std  : {scaler["y_std"]}')
+
+    # ----------------------------------------------------------- training history --
+    print('\nTraining History')
+    print(thin)
+    train_losses = history['train_losses']
+    val_losses   = history['val_losses']
+    best_epoch   = int(np.argmin(val_losses))
+    print(f'  Epochs trained   : {len(train_losses)}')
+    print(f'  Best val loss    : {history["best_val_loss"]:.4e}  (epoch {best_epoch})')
+    print(f'  Final train loss : {train_losses[-1]:.4e}')
+    print(f'  Final val loss   : {val_losses[-1]:.4e}')
+    print(f'  Early stopped    : {"Yes" if history["stopped_early"] else "No"}')
+    print(f'  Pruned           : {"Yes" if history["pruned"] else "No"}')
+    print()

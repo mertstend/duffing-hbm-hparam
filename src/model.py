@@ -67,3 +67,4 @@ def build_mlp(
     # Final linear layer — no activation, so the output is unbounded
     layers.append(nn.Linear(in_features, output_size))
     return nn.Sequential(*layers)
+

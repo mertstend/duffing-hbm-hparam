@@ -20,11 +20,12 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # -- settings ------------------------------------------------------------------
 
 DATA_ID           = '2026-02-18_14-04-47'  # name of the data set
-N_TRIALS          = 15
+N_TRIALS          = 200
 SAVE              = True
 TRIAL_N_EPOCHS    = 800
 TRIAL_ES_PATIENCE = 100
-device            = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device            = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = device = torch.device('cpu')  # small model sizes and short epochs make CPU faster here.
 
 # -- data — loaded once and reused across all trials ---------------------------
 

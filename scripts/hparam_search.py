@@ -20,7 +20,7 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # -- settings ------------------------------------------------------------------
 
 DATA_ID           = '2026-02-18_14-04-47'
-N_TRIALS          = 100
+N_TRIALS          = 200
 SAVE              = True
 TRIAL_N_EPOCHS    = 800
 TRIAL_ES_PATIENCE = 100
@@ -36,15 +36,15 @@ X_train, y_train, X_val, y_val, *_, scaler = load_and_scale_data(DATA_ID)
 def config_from_trial(trial: optuna.Trial) -> ModelConfig:
     """Map an Optuna trial to a ModelConfig by sampling the search space."""
     n_layers    = trial.suggest_int('n_layers', 1, 6)
-    hidden_size = trial.suggest_categorical('hidden_size', [8, 16, 32, 64])
+    hidden_size = trial.suggest_categorical('hidden_size', [4, 8, 16, 32, 64])
     return ModelConfig(
         # All layers share the same width; keeps the search space manageable.
         hidden_sizes            = [hidden_size] * n_layers,
         activation              = trial.suggest_categorical('activation',
-                                      ['relu', 'gelu', 'tanh']),
-        dropout                 = trial.suggest_float('dropout', 0.0, 0.1),
+                                      ['relu', 'gelu', 'tanh', 'sigmoid', 'elu']),
+        dropout                 = trial.suggest_float('dropout', 0.0, 0.2),
         batch_size              = trial.suggest_categorical('batch_size',
-                                      [64, 128, 256]),
+                                      [64, 128, 256, 512]),
         learning_rate           = trial.suggest_float('learning_rate',
                                       1e-4, 1e-2, log=True),
         n_epochs                = TRIAL_N_EPOCHS,

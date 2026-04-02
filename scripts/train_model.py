@@ -1,202 +1,82 @@
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'  # suppress duplicate OpenMP warning on Windows
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import joblib
+
 from src.util import check_folder_structure
+from src.config import ModelConfig
+from src.model import build_mlp
+from src.plotting import loss_plot
+from src.training import load_and_scale_data, fit, save_artifacts
 
-
-###############################################################################
-# Define custom NMSE loss function
-###############################################################################
-class NMSELoss(nn.Module):
-    def __init__(self):
-        super(NMSELoss, self).__init__()
-
-    def forward(self, predictions, targets):
-        # Calculate Mean Squared Error
-        mse = torch.mean((predictions - targets) ** 2)
-
-        # Calculate Variance (or Mean Squared Value) of targets
-        # Using MSE of target relative to 0 is common
-        target_norm = torch.mean(targets ** 2)
-
-        # Calculate Normalized MSE
-        nmse = mse / (target_norm + 1e-8)  # 1e-8 to avoid division by zero
-        return nmse
-
-
-###############################################################################
-# Check folder structure
-###############################################################################
 check_folder_structure()
 
-
 ###############################################################################
-# hyperparameters
+# IDs and flags
 ###############################################################################
-SAVE = True  # whether to save the trained model
+SAVE   = True
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if not SAVE:
     RED = "\033[91m"
     RESET = "\033[0m"
-    input(f'{RED}WARNING: SAVE is set to {SAVE}. To save the model, ' +
+    input(f'{RED}WARNING: SAVE is set to {SAVE}. To save the model, '
           f'set SAVE = True. Press Enter to continue...{RESET}')
-model_id = '2026-02-18_13-29-30'
+
 data_id = '2026-02-18_14-04-47'
-n_epochs = 1000
-batch_size = 10
 
 ###############################################################################
-# load data
+# Configuration — edit here to change hyperparameters
 ###############################################################################
-train_data = np.load(f'data/duffing_train_data_H3_N64_{data_id}.npz')
-X_train = train_data['q_coeffs']  # input: [a1, b1, a3, b3]
-y_train = train_data['fnl_coeffs']  # output: [A1, B1, A3, B3]
-
-test_data = np.load(f'data/duffing_test_data_H3_N64_{data_id}.npz')
-X_test = test_data['q_coeffs']
-y_test = test_data['fnl_coeffs']
-
-val_data = np.load(f'data/duffing_val_data_H3_N64_{data_id}.npz')
-X_val = val_data['q_coeffs']
-y_val = val_data['fnl_coeffs']
-
-###############################################################################
-# compute scaling parameters from training data only
-###############################################################################
-X_mean = X_train.mean(axis=0)
-X_std = X_train.std(axis=0)
-X_std[X_std == 0] = 1.0
-
-y_mean = y_train.mean(axis=0)
-y_std = y_train.std(axis=0)
-y_std[y_std == 0] = 1.0
-
-###############################################################################
-# scale data
-###############################################################################
-X_train = (X_train - X_mean) / X_std
-X_val = (X_val - X_mean) / X_std
-X_test = (X_test - X_mean) / X_std
-
-y_train = (y_train - y_mean) / y_std
-y_val = (y_val - y_mean) / y_std
-y_test = (y_test - y_mean) / y_std
-
-###############################################################################
-# convert to PyTorch tensors
-###############################################################################
-X_train = torch.tensor(X_train, dtype=torch.float32)
-y_train = torch.tensor(y_train, dtype=torch.float32)
-
-X_val = torch.tensor(X_val, dtype=torch.float32)
-y_val = torch.tensor(y_val, dtype=torch.float32)
-
-X_test = torch.tensor(X_test, dtype=torch.float32)
-y_test = torch.tensor(y_test, dtype=torch.float32)
-
-print('Data shapes:')
-print(f'X_train.shape: {X_train.shape}, y_train.shape: {y_train.shape}')
-print(f'X_val.shape: {X_val.shape}, y_val.shape: {y_val.shape}')
-print(f'X_test.shape: {X_test.shape}, y_test.shape: {y_test.shape}')
-
-###############################################################################
-# define and train the model
-###############################################################################
-model = nn.Sequential(
-    nn.Linear(4, 32),
-    nn.ReLU(),
-    nn.Linear(32, 32),
-    nn.ReLU(),
-    nn.Linear(32, 32),
-    nn.ReLU(),
-    nn.Linear(32, 32),
-    nn.ReLU(),
-    nn.Linear(32, 32),
-    nn.ReLU(),
-    nn.Linear(32, 4)
+config = ModelConfig(
+    hidden_sizes=[32, 32, 32, 32, 32],
+    activation='relu',
+    dropout=0.0,
+    n_epochs=1000,
+    batch_size=64,
+    early_stopping_patience=50,
 )
 
-loss_fn = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+###############################################################################
+# Data
+###############################################################################
+X_train, y_train, X_val, y_val, *_, scaler = load_and_scale_data(data_id)
 
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer,
-    mode='min',
-    factor=0.5,
-    patience=20,
-    threshold=1e-4,
-    threshold_mode='rel',
-    min_lr=1e-8
+###############################################################################
+# Model
+###############################################################################
+model = build_mlp(
+    input_size=X_train.shape[1],
+    output_size=y_train.shape[1],
+    hidden_sizes=config.hidden_sizes,
+    activation=config.activation,
+    dropout=config.dropout,
 )
-
-train_data_losses = []
-validation_losses = []
-
-print('\nStarting training:')
-for epoch in range(n_epochs):
-    epoch_data_loss = 0.0
-    n_batches = 0
-
-    for i in range(0, len(X_train), batch_size):
-        Xbatch = X_train[i:i+batch_size]
-        ybatch = y_train[i:i+batch_size]
-
-        optimizer.zero_grad()
-        y_pred = model(Xbatch)
-        data_loss = loss_fn(y_pred, ybatch)
-        loss = data_loss
-        loss.backward()
-        optimizer.step()
-
-        epoch_data_loss += data_loss.item()
-        n_batches += 1
-
-    train_data_losses.append(epoch_data_loss / n_batches)
-
-    model.eval()
-    with torch.no_grad():
-        y_validation_pred = model(X_val)
-        validation_loss = loss_fn(y_validation_pred, y_val).item()
-    model.train()
-    validation_losses.append(validation_loss)
-
-    scheduler.step(validation_loss)
-
-    # shuffle training data to avoid systematic batch artefacts
-    perm = torch.randperm(len(X_train))
-    X_train = X_train[perm]
-    y_train = y_train[perm]
-
-    current_lr = optimizer.param_groups[0]['lr']
-    print(
-        f'Epoch {epoch:4d} | '
-        f'train loss = {epoch_data_loss / n_batches:.3e} |'
-        f'val loss = {validation_loss:.3e} | '
-        f'lr = {current_lr:.3e}')
-
-print('\nFinished training:')
-print(f'Final train loss: {train_data_losses[-1]:.3e}')
-print(f'Final validation loss: {validation_losses[-1]:.3e}')
-
-###############################################################################
-# save model and training history
-###############################################################################
-if SAVE:
-    # save current date to be able to load the model later
-    save_date = np.datetime64('now').astype('str').replace(
-        ':', '-').replace('T', '_')
-    torch.save(model, f'models/duffing_mlp_h3_{save_date}.pt')
-    joblib.dump({'train_losses': train_data_losses,
-                 'validation_losses': validation_losses},
-                f'models/duffing_losses_h3_{save_date}.joblib')
-    joblib.dump({
-        'X_mean': X_mean,
-        'X_std': X_std,
-        'y_mean': y_mean,
-        'y_std': y_std
-    }, f'models/duffing_scaler_h3_{save_date}.joblib')
-    print(f'Model and scaler saved with date id {save_date}')
-
-print('\nTrained model:')
+print('\nModel architecture:')
 print(model)
+
+###############################################################################
+# Training
+###############################################################################
+history = fit(model, X_train, y_train, X_val, y_val, config, device=device)
+
+print(f'\nFinal train loss : {history["train_losses"][-1]:.3e}')
+print(f'Final val   loss : {history["val_losses"][-1]:.3e}')
+print(f'Best  val   loss : {history["best_val_loss"]:.3e}')
+
+###############################################################################
+# Save
+###############################################################################
+save_date = (np.datetime64('now').astype('str')
+             .replace(':', '-').replace('T', '_'))
+if SAVE:
+    save_artifacts(model, scaler, history, save_date)
+
+###############################################################################
+# Plot loss curves
+###############################################################################
+loss_plot(history['train_losses'], history['val_losses'],
+          figure_name=f'loss_{save_date}', save_figure=SAVE)
+plt.show()
+

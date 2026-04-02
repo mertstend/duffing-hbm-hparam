@@ -10,7 +10,7 @@ from src.util import check_folder_structure
 from src.config import ModelConfig
 from src.model import build_mlp
 from src.plotting import loss_plot
-from src.training import load_and_scale_data, fit, save_artifacts
+from src.training import load_and_scale_data, fit, save_artifacts, load_artifacts, display_model_info
 
 check_folder_structure()
 
@@ -181,3 +181,9 @@ if SAVE:
 loss_plot(history['train_losses'], history['val_losses'],
           figure_name=f'loss_{save_date}', save_figure=SAVE)
 plt.show()
+
+# -- display the best model's configuration ------------------------------------------------
+
+if SAVE:
+    loaded_model, loaded_scaler, loaded_history = load_artifacts(save_date)
+    display_model_info(loaded_model, loaded_scaler, loaded_history, model_id=save_date)

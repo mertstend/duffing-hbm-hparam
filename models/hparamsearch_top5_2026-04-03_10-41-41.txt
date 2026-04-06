@@ -1,0 +1,9 @@
+Top 5 trials — hyperparameter search 2026-04-03_10-41-41
+=======================================================
+
+ number        value params_activation  params_batch_size  params_dropout  params_hidden_size  params_learning_rate  params_n_layers    state
+    878 5.958344e-07              gelu                 64        0.000003                 128              0.004151                3 COMPLETE
+    827 9.171869e-07              gelu                 64        0.000005                 128              0.002775                3 COMPLETE
+    611 1.178477e-06              gelu                 64        0.000016                 128              0.001707                3 COMPLETE
+    935 1.224245e-06              gelu                 64        0.000044                  64              0.006227                3 COMPLETE
+    819 1.245014e-06              gelu                 64        0.000017                 128              0.002381                3 COMPLETE

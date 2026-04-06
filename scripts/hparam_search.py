@@ -20,9 +20,9 @@ optuna.logging.set_verbosity(optuna.logging.WARNING)
 # -- settings ------------------------------------------------------------------
 
 DATA_ID           = '2026-02-18_14-04-47'  # name of the data set
-N_TRIALS          = 200
+N_TRIALS          = 1000
 SAVE              = True
-TRIAL_N_EPOCHS    = 800
+TRIAL_N_EPOCHS    = 1000
 TRIAL_ES_PATIENCE = 100
 # device            = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = device = torch.device('cpu')  # small model sizes and short epochs make CPU faster here.
@@ -36,8 +36,8 @@ X_train, y_train, X_val, y_val, *_, scaler = load_and_scale_data(DATA_ID)
 
 def config_from_trial(trial: optuna.Trial) -> ModelConfig:
     """Map an Optuna trial to a ModelConfig by sampling the search space."""
-    n_layers    = trial.suggest_int('n_layers', 1, 6)
-    hidden_size = trial.suggest_categorical('hidden_size', [4, 8, 16, 32, 64])
+    n_layers    = trial.suggest_int('n_layers', 1, 10)
+    hidden_size = trial.suggest_categorical('hidden_size', [4, 8, 16, 32, 64, 128])
     return ModelConfig(
         # All layers share the same width; keeps the search space manageable.
         hidden_sizes            = [hidden_size] * n_layers,
